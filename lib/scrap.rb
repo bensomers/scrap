@@ -1,5 +1,4 @@
-class Scrap < Rails::Rack::Metal	
-	PATH = "/stats/scrap".freeze
+class Scrap
 	COMMIFY_REGEX = /(\d)(?=(\d\d\d)+(?!\d))/
 	CRLF = "\r\n"
 	
@@ -22,9 +21,9 @@ class Scrap < Rails::Rack::Metal
 	end
 	
 	def self.call(env)
-	  if !@@gc_stats_enabled then
-		GC.enable_stats if GC.respond_to? :enable_stats
-		@@gc_stats_enabled = true
+	  if !@@gc_stats_enabled
+  		GC.enable_stats if GC.respond_to? :enable_stats
+  		@@gc_stats_enabled = true
 	  end
 	  @@requests_processed += 1
 	  @@last_gc_run ||= @@alive_at ||= Time.now.to_f
@@ -35,11 +34,7 @@ class Scrap < Rails::Rack::Metal
 	  @@request_list.unshift req	  
 	  @@request_list.pop if @@request_list.length > (config["max_requests"] || 150)
 	  
-	  if env["PATH_INFO"] == PATH
 		gc_stats
-	  else
-		NotFoundResponse
-	  end
 	end
 
 	def self.gc_stats		
