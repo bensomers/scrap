@@ -1,6 +1,6 @@
 Scrap is a Rails Metal endpoint designed to expose various garbage and memory-related metrics about your app. It may be particularly useful in tracking down memory leaks.
 
-To use it, simply install the plugin. This will provide a new url, <code>/stats/scrap</code>, which will report a number of metrics about your app.
+To use it, simply install the plugin and configure as Middleware in your application.rb ("config.middleware.use 'Scrap'").  This will provide a new url, <code>/stats/scrap</code>, which will report a number of metrics about your app.
 
 For an example of the output, see [http://tachyonsix.com/scrap.htm](http://tachyonsix.com/scrap.htm)
 

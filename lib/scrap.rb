@@ -1,6 +1,14 @@
 class Scrap
 	COMMIFY_REGEX = /(\d)(?=(\d\d\d)+(?!\d))/
 	CRLF = "\r\n"
+
+	def initialize(app)
+	   @@app = app
+	end
+	
+	def call(env)
+	   Scrap.call(env)
+	end
 	
 	@@gc_stats = {}
 	@@last_gc_run = nil
@@ -28,13 +36,17 @@ class Scrap
 	  @@requests_processed += 1
 	  @@last_gc_run ||= @@alive_at ||= Time.now.to_f
 	  @@last_gc_mem ||= get_usage
-	  
+  
 	  req = sprintf("<p>[%-10.2fMB] %s %s</p>", get_usage, env["REQUEST_METHOD"], env["PATH_INFO"])
 	  req << "<pre>#{ObjectSpace.statistics}</pre>" if ObjectSpace.respond_to? :statistics
 	  @@request_list.unshift req	  
 	  @@request_list.pop if @@request_list.length > (config["max_requests"] || 150)
-	  
-		gc_stats
+  
+	  if env["PATH_INFO"] == "/stats/scrap"
+   	  gc_stats
+     else
+        @@app.call(env) 
+	  end
 	end
 
 	def self.gc_stats		
