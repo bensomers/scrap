@@ -40,7 +40,7 @@ class Scrap
   
     req = sprintf("<p>vsize:[%-10.2fMB] rss:[%-10.2fMB] %s %s</p>", get_usage[:virtual], get_usage[:real], env["REQUEST_METHOD"], env["PATH_INFO"])
     req << "<pre>#{ObjectSpace.statistics}</pre>" if ObjectSpace.respond_to? :statistics
-    req << "<pre>#{GC.stat}</pre>" if GC.respond_to? :stat
+    req << "<pre>#{readable_gc_stat}</pre>" if GC.respond_to? :stat
     @@request_list.unshift req    
     @@request_list.pop if @@request_list.length > (config["max_requests"] || 150)
   
@@ -199,6 +199,17 @@ class Scrap
     end
   end
   
+  def self.readable_gc_stat
+    stat = GC.stat
+    "GC cycles so far: #{stat[:count]}\n
+     Number of heaps : #{stat[:heap_used]}\n
+     Heap length     : #{stat[:heap_length]}\n
+     Heap increment  : #{stat[:heap_increment]}\n
+     Heap live num   : #{stat[:heap_live_num]}\n
+     Heap free num   : #{stat[:heap_free_num]}\n
+     Heap final num  : #{stat[:heap_final_num]}\n"
+  end
+
   def self.commify(i)
     i.to_s.gsub(COMMIFY_REGEX, "\\1,")
   end
