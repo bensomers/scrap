@@ -3,11 +3,11 @@ class Scrap
   CRLF = "\r\n"
 
   def initialize(app)
-     @@app = app
+    @@app = app
   end
   
   def call(env)
-     Scrap.call(env)
+    Scrap.call(env)
   end
   
   @@gc_stats = {}
@@ -30,39 +30,41 @@ class Scrap
   
   def self.call(env)
     if !@@gc_stats_enabled
-      GC.enable_stats if GC.respond_to? :enable_stats
+      GC.enable_stats if GC.respond_to? :enable_stats # for REE
+      GC::Profiler.enable if defined? GC::Profiler # for 1.9.3+
       @@gc_stats_enabled = true
     end
     @@requests_processed += 1
     @@last_gc_run ||= @@alive_at ||= Time.now.to_f
     @@last_gc_mem ||= get_usage
   
-    req = sprintf("<p>[%-10.2fMB] %s %s</p>", get_usage, env["REQUEST_METHOD"], env["PATH_INFO"])
+    req = sprintf("<p>vsize:[%-10.2fMB] rss:[%-10.2fMB] %s %s</p>", get_usage[:virtual], get_usage[:real], env["REQUEST_METHOD"], env["PATH_INFO"])
     req << "<pre>#{ObjectSpace.statistics}</pre>" if ObjectSpace.respond_to? :statistics
+    req << "<pre>#{GC.stat}</pre>" if GC.respond_to? :stat
     @@request_list.unshift req    
     @@request_list.pop if @@request_list.length > (config["max_requests"] || 150)
   
     if env["PATH_INFO"] == "/stats/scrap"
       gc_stats
-     else
-        @@app.call(env) 
+    else
+      @@app.call(env) 
     end
   end
 
   def self.gc_stats   
     collected = nil
     puts "Respond to? #{ObjectSpace.respond_to? :live_objects}"
-    if ObjectSpace.respond_to? :live_objects then
+    if ObjectSpace.respond_to? :live_objects
       live = ObjectSpace.live_objects
       GC.start
       collected = live - ObjectSpace.live_objects
     else
       GC.start
     end
-    GC.start
     usage = get_usage
     
-    mem_delta = usage - @@last_gc_mem
+    virtual_mem_delta = usage[:virtual] - @@last_gc_mem[:virtual]
+    real_mem_delta = usage[:real] - @@last_gc_mem[:real]
     time_delta = Time.now.to_f - @@last_gc_run    
     s = ''
     s << '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01//EN"' << CRLF
@@ -75,18 +77,22 @@ class Scrap
     s << "<h1>Scrap - PID #{$$}</h1>" << CRLF
     
     s << '<table>' << CRLF
-    s << sprintf('<tr><td class="t">Memory usage:</td><td>%2.2fMB</td></tr>', usage)
-    s << sprintf('<tr><td class="t">Delta:</td><td>%2.2fMB</td></tr>', mem_delta)
+    s << sprintf('<tr><td class="t">Virtual Memory usage:</td><td>%2.2fMB</td></tr>', usage[:virtual])
+    s << sprintf('<tr><td class="t">Real Memory usage:</td><td>%2.2fMB</td></tr>', usage[:real])
+    s << sprintf('<tr><td class="t">Vsize Delta:</td><td>%2.2fMB</td></tr>', virtual_mem_delta)
+    s << sprintf('<tr><td class="t">RSS Delta:</td><td>%2.2fMB</td></tr>', real_mem_delta)
     s << sprintf('<tr><td class="t">Last Scrap req:</td><td>%2.2f seconds ago</td></tr>', time_delta)
     s << sprintf('<tr><td class="t">Requests processed:</td><td>%s</td></tr>', @@requests_processed)
     s << sprintf('<tr><td class="t">Alive for:</td><td>%2.2f seconds</td></tr>', Time.now.to_f - @@alive_at)
-    if GC.respond_to? :time then
-      s << sprintf('<tr><td class="t">Time spent in GC:</td><td>%2.2f seconds</td></tr>', GC.time / 1000000.0)
+    if GC.respond_to? :time
+      s << sprintf('<tr><td class="t">Total time spent in GC:</td><td>%2.2f seconds</td></tr>', GC.time / 1000000.0)
+    elsif defined? GC::Profiler
+      s << sprintf('<tr><td class="t">Total time spent in GC:</td><td>%2.2f seconds</td></tr>', GC::Profiler.total_time / 1000.0)
     end
     if collected
       s << sprintf('<tr><td class="t">Collected objects:</td><td>%2d</td></tr>', collected)
       s << sprintf('<tr><td class="t">Live objects:</td><td>%2d</td></tr>', ObjectSpace.live_objects)
-    end
+    end 
     s << '</table>' << CRLF
 
     s << "<h3>Top #{config["max_objects"]} deltas since last request</h3>"
@@ -119,13 +125,15 @@ class Scrap
     @@last_gc_run = Time.now.to_f
     @@last_gc_mem = usage
     @@requests_processed = 0
-    [200, {"Content-Type" => "text/html"}, s]
+    [200, {"Content-Type" => "text/html"}, [s]]
   end
   
   def self.get_usage
-    usage = 0
+    usage = Hash.new("N/A")
     begin
-      usage = `cat /proc/#{$$}/stat`.split(" ")[22].to_i / (1024 * 1024).to_f
+      stat = `cat /proc/#{$$}/stat`.split(" ")
+      usage[:virtual] = stat[22].to_i / (1024 * 1024).to_f
+      usage[:real] = stat[23].to_i * (`getconf PAGESIZE`.to_f) / (1024 * 1024).to_f
     rescue
       # pass
     end
