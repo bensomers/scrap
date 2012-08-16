@@ -201,13 +201,7 @@ class Scrap
   
   def self.readable_gc_stat
     stat = GC.stat
-    "GC cycles so far: #{stat[:count]}\n
-     Number of heaps : #{stat[:heap_used]}\n
-     Heap length     : #{stat[:heap_length]}\n
-     Heap increment  : #{stat[:heap_increment]}\n
-     Heap live num   : #{stat[:heap_live_num]}\n
-     Heap free num   : #{stat[:heap_free_num]}\n
-     Heap final num  : #{stat[:heap_final_num]}\n"
+    "GC cycles so far: #{stat[:count]}\n Number of heaps : #{stat[:heap_used]}\n Heap length     : #{stat[:heap_length]}\n Heap increment  : #{stat[:heap_increment]}\n Heap live num   : #{stat[:heap_live_num]}\n Heap free num   : #{stat[:heap_free_num]}\n Heap final num  : #{stat[:heap_final_num]}\n"
   end
 
   def self.commify(i)
