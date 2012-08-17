@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.email       = ["joseph.chen@gmail.com"]
   s.homepage    = ""
   s.summary     = %q{Scrap is a Rails Metal endpoint designed to expose various garbage and memory-related metrics about your app. It may be particularly useful in tracking down memory leaks.}
-  s.description = %q{TODO: Write a gem description}
+  s.description = %q{Scrap is a Rails Metal endpoint designed to expose various garbage and memory-related metrics about your app. It may be particularly useful in tracking down memory leaks.}
 
   s.rubyforge_project = "scrap"
 
