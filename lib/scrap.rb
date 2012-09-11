@@ -1,3 +1,6 @@
+require "scrap/version"
+module Scrap
+  
 class Scrap
   COMMIFY_REGEX = /(\d)(?=(\d\d\d)+(?!\d))/
   CRLF = "\r\n"
@@ -207,4 +210,8 @@ class Scrap
   def self.commify(i)
     i.to_s.gsub(COMMIFY_REGEX, "\\1,")
   end
+end
+
+require "scrap/railtie" if defined? Rails
+
 end
