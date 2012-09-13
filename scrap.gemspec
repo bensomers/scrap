@@ -6,7 +6,7 @@ Gem::Specification.new do |s|
   s.name        = "scrap"
   s.version     = Scrap::VERSION
   s.authors     = ["Chris Heald", "Bradley Harris", "Ben Somers", "Joseph Chen"]
-  s.email       = ["joseph.chen@gmail.com", "somers.ben@gmail.com"]
+  s.email       = ["somers.ben@gmail.com", "joseph.chen@gmail.com"]
   s.homepage    = "http://www.github.com/bensomers/scrap"
   s.summary     = %q{Scrap is a Rack endpoint designed to expose various garbage and memory-related metrics about your app. Intended for tracking down memory leaks and bloat.}
   s.description = %q{Scrap is a Rack endpoint designed to expose various garbage and memory-related metrics about your app. Intended for tracking down memory leaks and bloat.}

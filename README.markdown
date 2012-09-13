@@ -5,13 +5,32 @@ For use in Rack apps: install the gem, require 'scrap', and run Scrap as a middl
 
 Scrap will provide a new url, <code>/stats/scrap</code>, which will report a number of metrics about your app.
 
-For an example of the output, see [TBD].
+For an example of the output, see sample.html (taken from a very large
+Rails app).
+
+## Usage
+
+If you're running scrap in a Rails app, just add it to your Gemfile (or
+install it and require it, if you're not using Bundler). Scrap comes
+with a Rails::Engine that will automatically require the middleware and
+add its route.
+
+If you're not using Rails, then you'll have to add Scrap::Middleware to
+your middleware stack.
+
+Scrap is not recommended for long-term production usage, as it does
+incur a significant (though not crippling) performance penalty.
+Typically, you would install it for a few days at a time when you
+suspect you have a memory problem and want to hunt it down, then remove
+Scrap once you're done debugging.
 
 ## Dependencies
 
 None, really, though Scrap is intended for Linux systems. On OS
 X, the Ruby GC statistics will be displayed, but overall process memory
-usage will not be reported.
+usage will not be reported. Scrap has been tested extensively with Ruby 1.9 on Rails 3.0.x, and 
+less so on 3.1.x and 3.2.x. Reports of Scrap's usefulness in other
+configurations are welcome.
 
 ## Config
 
@@ -30,7 +49,8 @@ If present, Scrap will use a config/scrap.yml file. See the provided example fil
 Scrap was originally written for Ruby 1.8.7, with lots of switches to
 enable it to take advantage of REE's better GC statistics visibility.
 I've rewritten the switches to allow Scrap to use 1.9.3's statistics,
-though they're harder to understand than REE's.
+though they're harder to understand than REE's. Scrap should still work
+well with REE, and less well (but as well as possible) on MRI 1.8.7.
 
 ## Contributing
 
