@@ -1,3 +1,3 @@
 Rails.application.routes.draw do
-  match "/stats/scrap" => Scrap
+  mount Scrap::Middleware => "/stats/scrap"
 end

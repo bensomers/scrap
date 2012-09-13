@@ -1,7 +1,7 @@
 require "scrap/version"
 module Scrap
   
-class Scrap
+class Middleware
   COMMIFY_REGEX = /(\d)(?=(\d\d\d)+(?!\d))/
   CRLF = "\r\n"
 
@@ -10,7 +10,7 @@ class Scrap
   end
   
   def call(env)
-    Scrap.call(env)
+    self.class.call(env)
   end
   
   @@gc_stats = {}
@@ -212,6 +212,6 @@ class Scrap
   end
 end
 
-require "scrap/railtie" if defined? Rails
+require "scrap/engine" if defined? Rails
 
 end
