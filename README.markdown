@@ -1,3 +1,5 @@
+[![Code Climate](https://codeclimate.com/badge.png)](https://codeclimate.com/github/bensomers/scrap)
+
 Scrap is a Rack endpoint designed to expose various garbage and memory-related metrics about your app. It may be particularly useful in tracking down memory leaks or bloated actions.
 
 For use in Rails apps: just add it to your Gemfile (if you're using bundler, which you probably are). Scrap includes a railtie that will automatically activate it.
